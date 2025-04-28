@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StepPet</title>
+  <style>
+    /* General Styles */
+    body {
+      margin: 0;
+      font-family: 'Quicksand', sans-serif;
+      background: linear-gradient(to bottom, lavender, skyblue);
+      color: #333;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      overflow: hidden;
+    }
+    h1, h2, h3 {
+      margin: 10px 0;
+    }
+    button {
+      margin: 10px;
+      padding: 10px 20px;
+      font-size: 16px;
+      border: none;
+      border-radius: 20px;
+      cursor: pointer;
+      background: #ff7eb3;
+      color: white;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      box-shadow: 0 6px 8px rgba(0, 0, 0, 0.2);
+    }
+    .hidden {
+      display: none;
+    }
+    .page {
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+    .progress-bar {
+      width: 100%;
+      height: 20px;
+      background: #ddd;
+      border-radius: 10px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .progress-bar div {
+      height: 100%;
+      background: #ff7eb3;
+      width: 0%;
+      transition: width 0.5s;
+    }
+    .nav {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: white;
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      box-shadow: 0 -2px 6px rgba(0, 0, 0, 0.1);
+    }
+    .nav button {
+      background: none;
+      color: #333;
+      font-size: 14px;
+    }
+    .nav button.active {
+      color: #ff7eb3;
+      font-weight: bold;
+    }
+    .pet-display {
+      font-size: 100px;
+      margin: 20px 0;
+      position: relative;
+    }
+    .pet-item {
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 40px;
+    }
+    .animation {
+      animation-duration: 1s;
+      animation-fill-mode: forwards;
+    }
+    @keyframes bounce {
+      0%, 100% {
+        transform: translateY(0);
+      }
+      50% {
+        transform: translateY(-20px);
+      }
+    }
+    .bounce {
+      animation: bounce 1s ease-in-out;
+    }
+    @keyframes sparkle {
+      0% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+      50% {
+        opacity: 1;
+        transform: scale(1.2);
+      }
+      100% {
+        opacity: 0;
+        transform: scale(0.5);
+      }
+    }
+    .sparkle {
+      animation: sparkle 1s ease-in-out;
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome Page -->
+  <div id="welcome-page" class="page">
+    <h1>Welcome to StepPet!</h1>
+    <p>Turn your steps into love for your virtual pet.</p>
+    <button onclick="navigateTo('select-pet')">Start</button>
+  </div>
+
+  <!-- Pet Selection Page -->
+  <div id="select-pet-page" class="page hidden">
+    <h2>Choose Your Pet</h2>
+    <button onclick="selectPet('🐶 Dog', 'Bolt')">🐶 Dog</button>
+    <button onclick="selectPet('🐱 Cat', 'Luna')">🐱 Cat</button>
+    <button onclick="selectPet('🐰 Bunny', 'Bubbles')">🐰 Bunny</button>
+    <button onclick="navigateTo('customize-pet')">Customize Pet</button>
+  </div>
+
+  <!-- Customize Pet Page -->
+  <div id="customize-pet-page" class="page hidden">
+    <h2>Customize Your Pet</h2>
+    <p>Set your pet's name and birthdate!</p>
+    <input id="pet-name-input" type="text" placeholder="Enter pet's name" />
+    <input id="pet-birthdate-input" type="date" />
+    <button onclick="savePetDetails()">Save</button>
+    <button onclick="navigateTo('dashboard')">Back to Dashboard</button>
+  </div>
+
+  <!-- Dashboard Page -->
+  <div id="dashboard-page" class="page hidden">
+    <h2>Hi there, <span id="pet-name"></span>!</h2>
+    <div class="pet-display" id="pet-display"></div>
+    <p>Birthdate: <span id="pet-birthdate"></span></p>
+    <p>Today's Steps: <span id="steps-count">0</span></p>
+    <p>Coins: <span id="coins-count">0</span></p>
+    <div class="progress-bar">
+      <div id="daily-goal-progress"></div>
+    </div>
+    <p>Daily Goal: <span id="daily-goal">0%</span></p>
+    <button onclick="connectToWatch()">Connect to Digital Watch</button>
+    <button onclick="shareProgress()">Share Progress</button>
+    <button onclick="navigateTo('store')">Go to Store</button>
+    <button onclick="navigateTo('pet-care')">Pet Care</button>
+  </div>
+
+  <!-- Store Page -->
+  <div id="store-page" class="page hidden">
+    <h2>Pet Store</h2>
+    <p>Use your coins to buy items for your pet!</p>
+    <button onclick="buyItem('Hat 🎩', 'Your pet looks fancy with a hat!')">Buy Hat 🎩 (5 Coins)</button>
+    <button onclick="buyItem('Bowtie 🎀', 'Your pet looks adorable with a bowtie!')">Buy Bowtie 🎀 (5 Coins)</button>
+    <button onclick="buyItem('Toy Ball ⚽', 'Your pet is excited to play with the ball!')">Buy Toy Ball ⚽ (5 Coins)</button>
+    <button onclick="navigateTo('dashboard')">Back to Dashboard</button>
+  </div>
+
+  <!-- Pet Care Page -->
+  <div id="pet-care-page" class="page hidden">
+    <h2>Pet Care</h2>
+    <p>Take care of your pet to keep it happy!</p>
+    <button onclick="feedPet()">Feed 🍽️</button>
+    <button onclick="bathePet()">Bathe 🛁</button>
+    <button onclick="playWithPet()">Play 🎮</button>
+    <p>Pet Mood: <span id="pet-mood">Happy</span></p>
+    <div class="progress-bar">
+      <p>Hunger:</p>
+      <div id="hunger-bar" style="width: 80%;"></div>
+    </div>
+    <div class="progress-bar">
+      <p>Hygiene:</p>
+      <div id="hygiene-bar" style="width: 80%;"></div>
+    </div>
+    <button onclick="navigateTo('dashboard')">Back to Dashboard</button>
+  </div>
+
+  <!-- Navigation -->
+  <div class="nav">
+    <button onclick="navigateTo('dashboard')" class="active">Dashboard</button>
+    <button onclick="navigateTo('store')">Store</button>
+    <button onclick="navigateTo('pet-care')">Pet Care</button>
+  </div>
+
+  <script>
+    let steps = 0;
+    let coins = 0;
+    let dailyGoal = 5000; // Daily step goal
+    let petMood = "Happy";
+    let hunger = 80; // Hunger level (0-100)
+    let hygiene = 80; // Hygiene level (0-100)
+
+    function navigateTo(page) {
+      document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
+      document.getElementById(`${page}-page`).classList.remove('hidden');
+    }
+
+    function selectPet(emoji, name) {
+      document.getElementById('pet-name').textContent = name;
+      document.getElementById('pet-display').textContent = emoji;
+      navigateTo('customize-pet');
+    }
+
+    function savePetDetails() {
+      const name = document.getElementById('pet-name-input').value;
+      const birthdate = document.getElementById('pet-birthdate-input').value;
+      document.getElementById('pet-name').textContent = name || "Your Pet";
+      document.getElementById('pet-birthdate').textContent = birthdate || "Unknown";
+      navigateTo('dashboard');
+    }
+
+    function connectToWatch() {
+      alert('Simulating connection to a digital watch...');
+      simulateStepCounting();
+    }
+
+    function simulateStepCounting() {
+      setInterval(() => {
+        steps += Math.floor(Math.random() * 10) + 1; // Simulate steps
+        coins = Math.floor(steps / 1000); // 1 coin per 1000 steps
+        document.getElementById('steps-count').textContent = steps;
+        document.getElementById('coins-count').textContent = coins;
+
+        // Update daily goal progress
+        const progress = Math.min((steps / dailyGoal) * 100, 100);
+        document.getElementById('daily-goal-progress').style.width = `${progress}%`;
+        document.getElementById('daily-goal').textContent = `${Math.floor(progress)}%`;
+      }, 2000); // Update every 2 seconds
+    }
+
+    function shareProgress() {
+      const message = `I just walked ${steps} steps and earned ${coins} coins with StepPet!`;
+      alert(`Sharing: ${message}`);
+    }
+
+    function buyItem(item, message) {
+      if (coins >= 5) {
+        coins -= 5;
+        document.getElementById('coins-count').textContent = coins;
+        alert(message);
+      } else {
+        alert('Not enough coins!');
+      }
+    }
+
+    function feedPet() {
+      petMood = "Happy";
+      hunger = Math.min(hunger + 20, 100); // Increase hunger level
+      document.getElementById('pet-mood').textContent = petMood;
+      document.getElementById('hunger-bar').style.width = `${hunger}%`;
+      alert("You fed your pet!");
+    }
+
+    function bathePet() {
+      petMood = "Clean";
+      hygiene = Math.min(hygiene + 20, 100); // Increase hygiene level
+      document.getElementById('pet-mood').textContent = petMood;
+      document.getElementById('hygiene-bar').style.width = `${hygiene}%`;
+      alert("You bathed your pet!");
+    }
+
+    function playWithPet() {
+      petMood = "Excited";
+      document.getElementById('pet-mood').textContent = petMood;
+      alert("You played with your pet!");
+    }
+  </script>
+</body>
+</html>
